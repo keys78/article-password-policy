@@ -20,6 +20,8 @@ const App: React.FC = () => {
     showPassword: false,
   });
 
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const [isPasswordMatch, setIsPasswordMatch] = useState<boolean>(false);
   const [passwordValidation, setPasswordValidation] = useState<PasswordValidationCriteria[]>([
     { label: 'One number', isValid: false },
     { label: 'One uppercase letter', isValid: false },
@@ -29,7 +31,6 @@ const App: React.FC = () => {
     { label: 'Use 14-50 characters', isValid: false },
   ]);
 
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
@@ -39,11 +40,20 @@ const App: React.FC = () => {
     });
   };
 
-  const [isPasswordMatch, setIsPasswordMatch] = useState(true);
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
 
-  const validatePasswordConfirmation = (confirmation: string) => {
-    setIsPasswordMatch(formData.password === confirmation);
+    validatePassword(value);
   };
+
+  const handleShowPassword = () => {
+    setFormData({ ...formData, showPassword: !formData.showPassword });
+  };
+
 
   const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
@@ -55,27 +65,11 @@ const App: React.FC = () => {
     validatePasswordConfirmation(value);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
 
-    if (name === 'password') {
-      validatePassword(value);
-      setIsPasswordMatch(value === formData.confirmPassword);
-    } else if (name === 'confirmPassword') {
-      validatePasswordConfirmation(value);
-      setIsPasswordMatch(formData.password === value);
-    }
-
-    validatePassword(value);
+  const validatePasswordConfirmation = (confirmation: string) => {
+    setIsPasswordMatch(formData.password === confirmation);
   };
-
-  const handleShowPassword = () => {
-    setFormData({ ...formData, showPassword: !formData.showPassword });
-  };
+ 
 
   const validatePassword = (password: string) => {
     const updatedPasswordValidation = passwordValidation.map((criteria) => {
@@ -157,7 +151,7 @@ const App: React.FC = () => {
             id='password'
             value={formData.password}
             className='w-full border-2 border-gray-300 rounded-lg px-6 py-3 !focus:border-green-400'
-            onChange={handleChange}
+            onChange={handlePasswordChange}
           />
           <button className='uppercase absolute top-[38px] right-4 text-gray-500 bg-white' type="button" onClick={handleShowPassword}>
             {formData.showPassword ? 'Hide' : 'Show'}
@@ -165,7 +159,7 @@ const App: React.FC = () => {
         </div>
         <div>
           <ul className='grid sm:grid-cols-2 grid-cols-1 pt-2 pb-5 gap-2'>
-            {passwordValidation.map((criteria, index) => (
+            {passwordValidation?.map((criteria, index) => (
               <li
                 key={index}
                 className={criteria.isValid ? 'text-green-500' : 'text-gray-400'}
